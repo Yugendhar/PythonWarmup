@@ -9,7 +9,7 @@ for delim in ',':
 for delim in ')':
     a = a.replace(delim, '')
 print a
-a= a.strip().split()
+
 print a
 a= map(int,a)
 print a
