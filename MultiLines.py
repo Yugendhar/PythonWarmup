@@ -1,4 +1,5 @@
 #a=raw_input()
+#Takes input from multiple lines and prints its sum
 text = ""
 stopword = ""
 
