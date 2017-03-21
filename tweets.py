@@ -1,6 +1,9 @@
 import os
 from datetime import datetime
 from collections import deque
+import codecs
+import json
+
 # Set duration to start
 start_duration=datetime.now()
 # set global values
