@@ -93,7 +93,7 @@ def GetStateDateTextFile(curstate,curdate):
 def printExtractedDataToText(txtObj) :
     count= txtObj.increment
     body_text = body.replace('\n',' ').replace('\r',' ').replace('\r\n',' ').replace('\n\r',' ')
-    txtObj.txtfileObj.write(str(count)+','+str(count)+body_text+'\n')
+    txtObj.txtfileObj.write(str(count)+','+str(count)+','+body_text+'\n')
 '''
 =========================================================
 BEGIN THE FLOOD DATA EXTRACTION
