@@ -1,26 +1,22 @@
-import json
-import codecs
 import os
 from datetime import datetime
 from collections import deque
+import codecs
+import json
 
 # Set duration to start
 start_duration=datetime.now()
-
 # set global values
 iscsv=0
 isdev=1
-
 # Get the contextual path from drive
 # filepath='..\PythonPractice'
-filepath='G:\TestData'
-outpath = 'g:\TestDataOutPut\\'
-
+filepath='E:\TestData'
+outpath = 'e:\TestDataOutPut\\'
 print os.getcwd()
 lists= deque(os.listdir(filepath))
 print lists
 print os.listdir(os.getcwd())
-
 # set path for input and output
 def setPath():
     global outpath
@@ -31,16 +27,18 @@ def setPath():
     else:
         outpath = 'g:\SC_Flood_Data\Json_OutPut\\'
         filepath='G:\SC_Flood_Data\json'
-
-txtfileObj=None
-
 # Get files in specified path
 def GetFolderData():
     global lists
     lists= os.listdir(filepath)
-
-
-
+class TextFile(object):
+    def __init__(self,filename, mode):
+        self.count = 0
+        self.txtfileObj = codecs.open(outpath + filename + ".txt", mode,'utf-8')
+    @property
+    def increment(self):
+        self.count +=1
+        return self.count
 
 # set filters
 state="South Carolina"
@@ -50,20 +48,18 @@ unitedStates="United States"
 nonUnitedStates="Non_UnitedStates"
 notAvailable="NA"
 nonState="Non_SouthCarolina"
-
-
+txtfileObj=None
+date_txt_objects={}
 '''
 ================================
 Create and Write Text Files
 ================================
 '''
-
 '''
 ===========================================
 Create and Write to Text Files
 ===========================================
 '''
-
 # Text data files
 worldtxtfile=None
 statetxtfile=None
@@ -72,7 +68,6 @@ unitedStatestxtfile=None
 nonStatetxtfile=None
 nonUnitedStatesTextFile=None
 notAvailableCountryTextFile=None
-
 # create txt files
 def createtxtFiles():
     global statetxtfile
@@ -81,32 +76,27 @@ def createtxtFiles():
     global nonUnitedStatesTextFile
     global notAvailableCountry
     global notAvailableCountryTextFile
-
     #worldtxtfile=createTextFile("world")
-    statetxtfile=createTextFile(state.replace(" ","_"),'a')
-    nonStatetxtfile=createTextFile(nonState,'a')
-    unitedStatestxtfile=createTextFile(unitedStates,'a')
-    nonUnitedStatesTextFile=createTextFile(nonUnitedStates,'a')
-    notAvailableCountryTextFile=createTextFile(notAvailable,'a')
-
-
-# Creating a Txt file
-def createTextFile(filename,mode):
-    txtfileObj = codecs.open(outpath + filename + ".txt", mode,'utf-8')
-    return txtfileObj
-
+    statetxtfile=TextFile(state.replace(" ","_"),'a')
+    nonStatetxtfile=TextFile(nonState,'a')
+    unitedStatestxtfile=TextFile(unitedStates,'a')
+    nonUnitedStatesTextFile=TextFile(nonUnitedStates,'a')
+    notAvailableCountryTextFile=TextFile(notAvailable,'a')
 # Region and date specific
 def GetStateDateTextFile(curstate,curdate):
-    return createTextFile(curstate+'_'+curdate,'a')
+    date_filename=curstate+'_'+curdate
+    if date_filename not in date_txt_objects.keys():
+        date_txt_objects[date_filename]=TextFile(date_filename,'a')
+    return date_txt_objects[date_filename]
+
 
 # Get JSON to extracted data
-# print Extracted Data from Json files
+# Store Extracted Data from Json files into text file
 # All required data
 def printExtractedDataToText(txtObj) :
-    body_text = body.replace('\n',' ')
-    txtObj.write(body_text+'\n')
-
-
+    count= txtObj.increment
+    body_text = body.replace('\n',' ').replace('\r',' ').replace('\r\n',' ').replace('\n\r',' ')
+    txtObj.txtfileObj.write(str(count)+','+str(count)+','+body_text+'\n')
 '''
 =========================================================
 BEGIN THE FLOOD DATA EXTRACTION
@@ -114,9 +104,9 @@ BEGIN THE FLOOD DATA EXTRACTION
 '''
 # Set Input and Output FilePaths
 setPath()
-
 # get input data files
 GetFolderData()
+createtxtFiles()
 size=0
 for f in lists :
     with open(filepath+'\\'+f) as json_data :
@@ -133,7 +123,6 @@ for f in lists :
             country = ""
             region = ""
             locality = ""
-
             try :
                 #loads JSON data
                 data=json.loads(line)
@@ -141,7 +130,6 @@ for f in lists :
                 continue
             if "body" in data:
                 body=data["body"]
-
             if "object" in data:
                 objectpostedtime=data["object"]["postedTime"]
                 if "summary" in data["object"]:
@@ -155,7 +143,6 @@ for f in lists :
                         region=data["gnip"]["profileLocations"][0]["address"]["region"]
                     if "locality" in data["gnip"]["profileLocations"][0]["address"] :
                         locality=data["gnip"]["profileLocations"][0]["address"]["locality"]
-                createtxtFiles()
                 if country:
                     if country==unitedStates:
                         # United States country
@@ -176,6 +163,5 @@ for f in lists :
                 else :
                     # Country Not Available
                     printExtractedDataToText(notAvailableCountryTextFile)
-
 print datetime.now()-start_duration
 print size/((1024**2)*1.0)
